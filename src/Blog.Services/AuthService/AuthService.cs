@@ -24,7 +24,7 @@ namespace Blog.Services.AuthService
         public async Task<ServiceResponse<string>> Login(UserLoginDto user)
         {
             ServiceResponse<string> response = new();
-            var userToGet = userRepository.GetUserByName(user.UserName);
+            var userToGet = userRepository.GetByEmail(user.Email);
             if (userToGet == null)
             {
                 response.Success = false;
@@ -46,7 +46,7 @@ namespace Blog.Services.AuthService
         public async Task<ServiceResponse<int>> Register(UserDto user, string password)
         {
             ServiceResponse<int> response = new();
-            if (userRepository.CheckUserExistsByName(user.Username).Result == true)
+            if (userRepository.CheckExistsByEmail(user.Email, user.Mobile).Result == true)
             {
                 response.Success = false;
                 response.Message = "User Already Exists";

@@ -11,9 +11,9 @@ namespace Blog.Repositories.Users
     public interface IUserRepository
     {
 
-        Task<bool> CheckUserExistsByName(string username);
+        Task<bool> CheckExistsByEmail(string email, string mobile);
         void CreateUserAsync(UserDto user);
-        User GetUserByName(string username);
-
+        User GetUserById(int id);
+        User GetByEmail(string email);
     }
 }

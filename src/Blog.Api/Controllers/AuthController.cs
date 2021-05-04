@@ -28,7 +28,13 @@ namespace Blog.Api.Controllers
             ServiceResponse<int> response = await authService.Register(
                 new UserDto
                 {
-                    Username = userRegisterDto.UserName
+                    FirstName = userRegisterDto.FirstName,
+                    LastName = userRegisterDto.LastName,
+                    BloodGroup = userRegisterDto.BloodGroup,
+                    Address = userRegisterDto.Address,
+                    Email = userRegisterDto.Email,
+                    LastDateOfDonation = userRegisterDto.LastDateOfDonation,
+                    Mobile = userRegisterDto.Mobile
                 },
                 userRegisterDto.Password
                 );

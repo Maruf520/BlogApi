@@ -19,9 +19,9 @@ namespace Blog.Repositories.Users
             this.context = context;
             this.mapper = mapper;
         }
-        public async Task<bool> CheckUserExistsByName(string username)
+        public async Task<bool> CheckExistsByEmail(string email, string mobile)
         {
-            if (context.Users.Any(x => x.Username.ToLower() == username.ToLower()))
+            if (context.Users.Any(x => x.Mobile.ToLower() == mobile.ToLower() || x.Email == email))
             {
                 return true;
             }
@@ -34,10 +34,14 @@ namespace Blog.Repositories.Users
             context.Users.Add(usertomap);
             context.SaveChanges();
         }
-
-        public User GetUserByName(string username)
+        public User GetUserById(int id)
         {
-            var user = context.Users.FirstOrDefault(x => x.Username.ToLower().Equals(username.ToLower()));
+            var user = context.Users.FirstOrDefault(x => x.Id == id);
+            return user;
+        }
+        public User GetByEmail(string email)
+        {
+            var user = context.Users.FirstOrDefault(c => c.Email == email);
             return user;
         }
     }
