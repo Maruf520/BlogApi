@@ -46,10 +46,22 @@ namespace Blog.Services.AuthService
         public async Task<ServiceResponse<int>> Register(UserDto user, string password)
         {
             ServiceResponse<int> response = new();
-            if (userRepository.CheckExistsByEmail(user.Email, user.Mobile).Result == true)
+            if (userRepository.EmailIfExistsAsync(user.Email).Result == true)
             {
                 response.Success = false;
-                response.Message = "User Already Exists";
+                response.Message = "Email Already Exists";
+                return response;
+            }
+            else if (userRepository.MobileNumerIfExists(user.Mobile).Result == true)
+            {
+                response.Success = false;
+                response.Message = "Phone Number Already Exists";
+                return response;
+            }
+            else if (userRepository.EmailIfExistsAsync(user.Email).Result == true && userRepository.MobileNumerIfExists(user.Mobile).Result == true)
+            {
+                response.Success = false;
+                response.Message = "Email & Phone number Already Exists";
                 return response;
             }
 
@@ -58,6 +70,8 @@ namespace Blog.Services.AuthService
             user.PasswordSalt = passwordSalt;
 
             userRepository.CreateUserAsync(user);
+            response.Success = true;
+            response.Message = "Regsitered Successsyfully";
             return response;
         }
 
