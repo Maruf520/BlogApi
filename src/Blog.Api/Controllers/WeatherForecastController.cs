@@ -25,7 +25,6 @@ namespace Blog.Api.Controllers
         public WeatherForecastController(ILogger<WeatherForecastController> logger, IHttpContextAccessor httpContextAccessor)
         {
             _logger = logger;
-            _httpContextAccessor = httpContextAccessor;
         }
 
         [HttpGet]

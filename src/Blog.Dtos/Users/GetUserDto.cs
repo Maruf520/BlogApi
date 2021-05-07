@@ -5,11 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Blog.Models.UserModel
+namespace Blog.Dtos.Users
 {
-    public class User
+   public class GetUserDto
     {
-        public int Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Mobile { get; set; }
@@ -18,8 +17,5 @@ namespace Blog.Models.UserModel
         public BloodGroup BloodGroup { get; set; }
         public DateTime LastDateOfDonation { get; set; }
         public string Email { get; set; }
-        public byte[] PasswordHash { get; set; }
-        public byte[] PasswordSalt { get; set; }
-        public ICollection<Post> Posts { get; set; }
     }
 }

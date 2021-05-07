@@ -28,7 +28,7 @@ namespace Blog.Repositories.Users
             return false;
         }
 
-        public void CreateUserAsync(UserDto user)
+        public void CreateUserAsync(UserDto user)                                                     
         {
             var usertomap = mapper.Map<User>(user);
             context.Users.Add(usertomap);

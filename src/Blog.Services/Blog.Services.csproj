@@ -5,13 +5,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Blog.Dtos\Blog.Dtos.csproj" />
-    <ProjectReference Include="..\Blog.Models\Blog.Models.csproj" />
-    <ProjectReference Include="..\Blog.Repositories\Blog.Repositories.csproj" />
+    <Compile Remove="user\**" />
+    <EmbeddedResource Remove="user\**" />
+    <None Remove="user\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="user\" />
+    <ProjectReference Include="..\Blog.Dtos\Blog.Dtos.csproj" />
+    <ProjectReference Include="..\Blog.Models\Blog.Models.csproj" />
+    <ProjectReference Include="..\Blog.Repositories\Blog.Repositories.csproj" />
   </ItemGroup>
 
   <ItemGroup>
