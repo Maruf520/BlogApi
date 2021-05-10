@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Blog.Api.Controllers
@@ -14,11 +15,12 @@ namespace Blog.Api.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IAuthService authService;
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, IHttpContextAccessor httpContextAccessor)
         {
             this.authService = authService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
 
@@ -28,7 +30,13 @@ namespace Blog.Api.Controllers
             ServiceResponse<int> response = await authService.Register(
                 new UserDto
                 {
-                    Username = userRegisterDto.UserName
+                    FirstName = userRegisterDto.FirstName,
+                    LastName = userRegisterDto.LastName,
+                    BloodGroup = userRegisterDto.BloodGroup,
+                    Address = userRegisterDto.Address,
+                    Email = userRegisterDto.Email,
+                    LastDateOfDonation = userRegisterDto.LastDateOfDonation,
+                    Mobile = userRegisterDto.Mobile
                 },
                 userRegisterDto.Password
                 );
@@ -55,6 +63,7 @@ namespace Blog.Api.Controllers
 
             return Ok(response);
         }
+
 
     }
 }
