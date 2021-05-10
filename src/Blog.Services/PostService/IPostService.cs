@@ -10,5 +10,6 @@ namespace Blog.Services.PostService
     public interface IPostService
     {
         Task<PostDto> CreatePostAsync(CreatePostDto createPostDto);
+        Task<PostDto> UpdatePostAsync(UpdatePostDto updatePostDto);
     }
 }

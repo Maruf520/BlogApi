@@ -30,6 +30,15 @@ namespace Blog.Api.Controllers
             return Ok(x);
         
         }
+
+        [HttpPut("update")]
+
+        public async Task<IActionResult> UpdatePost (UpdatePostDto updatePostDto)
+        {
+            var updatedPost = await postService.UpdatePostAsync(updatePostDto);
+            return Ok(updatedPost);
+        }
+
         private int GetUserId() => int.Parse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
 
     }

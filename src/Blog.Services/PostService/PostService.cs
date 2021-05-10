@@ -2,6 +2,7 @@
 using Blog.Dtos.Posts;
 using Blog.Repositories.PostRepository;
 using Blog.Repositories.Users;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace Blog.Services.PostService
 {
+    [Authorize]
     public class PostService : IPostService
     {
         private readonly IPostRepository postRepository;
@@ -30,6 +32,13 @@ namespace Blog.Services.PostService
 
             return mapper.Map<PostDto>(createPost);
             
+        }
+
+        public async Task<PostDto> UpdatePostAsync (UpdatePostDto updatePostDto)
+        {
+          var updateAPost = await postRepository.UpdateAsync(updatePostDto);
+
+            return(mapper.Map<PostDto>(updateAPost));
         }
     }
 }

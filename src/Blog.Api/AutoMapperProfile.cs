@@ -17,6 +17,7 @@ namespace Blog.Api
             CreateMap<UserDto, User>();
             CreateMap<Post, PostDto>();
             CreateMap<CreatePostDto, PostDto>();
+            CreateMap<UpdatePostDto, PostDto>();
             CreateMap<User, GetUserDto>();
         }
     }

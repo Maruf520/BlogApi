@@ -44,6 +44,20 @@ namespace Blog.Repositories.PostRepository
             return mapper.Map<PostDto>(post);
         }
 
+        public  async Task<PostDto> UpdateAsync (UpdatePostDto updatePostDto)
+        {
+            var userid = 1;
+            var userPost =  blogContext.Posts.FirstOrDefault(x => x.User.Id == userid && x.Id == updatePostDto.Id);
+            userPost.Body = updatePostDto.Body;
+            userPost.Title = updatePostDto.Title;
+            userPost.UpdatedAt = DateTime.Now;
+
+            blogContext.Posts.Update(userPost);
+            blogContext.SaveChanges();
+
+            return mapper.Map<PostDto>(userPost);
+        }
+
        
     }
 }

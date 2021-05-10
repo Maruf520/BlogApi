@@ -11,5 +11,6 @@ namespace Blog.Repositories.PostRepository
     public interface IPostRepository
     {
         Task<PostDto> CreateAsync(CreatePostDto createPostDto);
+        Task<PostDto> UpdateAsync(UpdatePostDto updatePostDto);
     }
 }
