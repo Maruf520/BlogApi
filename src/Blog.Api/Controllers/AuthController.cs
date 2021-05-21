@@ -27,19 +27,7 @@ namespace Blog.Api.Controllers
         [HttpPost("Register")]
         public async Task<IActionResult> Register(UserRegisterDto userRegisterDto)
         {
-            ServiceResponse<int> response = await authService.Register(
-                new UserDto
-                {
-                    FirstName = userRegisterDto.FirstName,
-                    LastName = userRegisterDto.LastName,
-                    BloodGroup = userRegisterDto.BloodGroup,
-                    Address = userRegisterDto.Address,
-                    Email = userRegisterDto.Email,
-                    LastDateOfDonation = userRegisterDto.LastDateOfDonation,
-                    Mobile = userRegisterDto.Mobile
-                },
-                userRegisterDto.Password
-                );
+            ServiceResponse<int> response = await authService.Register(userRegisterDto);
             if (!response.Success)
             {
                 return BadRequest(response);

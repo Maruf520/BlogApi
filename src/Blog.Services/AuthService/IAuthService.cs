@@ -10,7 +10,7 @@ namespace Blog.Services.AuthService
 {
     public interface IAuthService
     {
-        Task<ServiceResponse<int>> Register(UserDto userDto, string password);
+        Task<ServiceResponse<int>> Register(UserRegisterDto userDto);
         Task<ServiceResponse<string>> Login(UserLoginDto user);
     }
 }
