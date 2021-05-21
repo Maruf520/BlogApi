@@ -10,7 +10,8 @@ namespace Blog.Repositories.PostRepository
 {
     public interface IPostRepository
     {
-        Task<PostDto> CreateAsync(CreatePostDto createPostDto);
-        Task<PostDto> UpdateAsync(UpdatePostDto updatePostDto);
+        Task<Post> CreateAsync(Post createPostDto);
+        Task<Post> UpdateAsync(Post updatePost);
+        Task<Post> GetById(int postId, int userId);
     }
 }
