@@ -1,4 +1,5 @@
-﻿using Blog.Dtos.Users;
+﻿using AutoMapper;
+using Blog.Dtos.Users;
 using Blog.Models;
 using Blog.Repositories.Users;
 using Blog.Services.UserExtentionService;
@@ -12,13 +13,14 @@ namespace Blog.Services.AuthService
 {
     public class AuthService : IAuthService
     {
-
+        private readonly IMapper mapper;
         private readonly IUserRepository userRepository;
         private readonly IUserExtentionService userExtentionService;
-        public AuthService(IUserRepository userRepository, IUserExtentionService userExtentionService)
+        public AuthService(IUserRepository userRepository, IUserExtentionService userExtentionService, IMapper mapper)
         {
             this.userRepository = userRepository;
             this.userExtentionService = userExtentionService;
+            this.mapper = mapper;
         }
 
         public async Task<ServiceResponse<string>> Login(UserLoginDto user)
@@ -43,7 +45,7 @@ namespace Blog.Services.AuthService
             return response;
         }
 
-        public async Task<ServiceResponse<int>> Register(UserDto user, string password)
+        public async Task<ServiceResponse<int>> Register(UserRegisterDto user)
         {
             ServiceResponse<int> response = new();
             if (userRepository.EmailIfExistsAsync(user.Email).Result == true)
@@ -64,12 +66,14 @@ namespace Blog.Services.AuthService
                 response.Message = "Email & Phone number Already Exists";
                 return response;
             }
+            
+            UserDto userDto = new UserDto();
+            var userToCreate = mapper.Map<UserDto>(user);
+            CreateHashPassword(user.Password, out byte[] passwordHash, out byte[] passwordSalt);
+            userToCreate.PasswordHash = passwordHash;
+            userToCreate.PasswordSalt = passwordSalt;
 
-            CreateHashPassword(password, out byte[] passwordHash, out byte[] passwordSalt);
-            user.PasswordHash = passwordHash;
-            user.PasswordSalt = passwordSalt;
-
-            userRepository.CreateUserAsync(user);
+            userRepository.CreateUserAsync(userToCreate);
             response.Success = true;
             response.Message = "Regsitered Successsyfully";
             return response;
