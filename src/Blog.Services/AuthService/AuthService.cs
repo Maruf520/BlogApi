@@ -23,50 +23,51 @@ namespace Blog.Services.AuthService
             this.mapper = mapper;
         }
 
-        public async Task<ServiceResponse<string>> Login(UserLoginDto user)
+        public async Task<Result<LoginResponse>> Login(UserLoginDto userDto)
         {
-            ServiceResponse<string> response = new();
-            var userToGet = userRepository.GetByEmail(user.Email);
+            var userToGet = userRepository.GetByEmail(userDto.Email);
             if (userToGet == null)
             {
-                response.Success = false;
-                response.Message = "User Not Found";
-                return response;
+                return Result<LoginResponse>.Failure("Email not found.");
             }
-            else if (!VerifyPasswordHash(user.Password, userToGet.PasswordHash, userToGet.PasswordSalt))
+            else if (!VerifyPasswordHash(userDto.Password, userToGet.PasswordHash, userToGet.PasswordSalt))
             {
-                response.Success = false;
-                response.Message = "Wromg Password";
+                return Result<LoginResponse>.Failure("Wromg Password");
             }
-            else
-            {
-                response.Data = await userExtentionService.GenerateAccessToken(userToGet);
-            }
-            return response;
+           var token = await userExtentionService.GenerateAccessToken(userToGet);
+           var result = userRepository.GetByEmail(userDto.Email);
+            var response = new LoginResponse();
+
+            response.Token = token;
+            response.ExpiresInSeconds = 3600;
+            response.User.FirstName = result.FirstName;
+            response.User.FirstName = result.FirstName;
+            response.User.LastName = result.LastName;
+            response.User.Mobile = result.Mobile;
+            response.User.Address = result.Address;
+            response.User.Image = result.Image;
+            response.User.Email = result.Email;
+
+            return Result<LoginResponse>.Success(response);
         }
 
-        public async Task<ServiceResponse<int>> Register(UserRegisterDto user)
+        public async Task<Result<string>> Register(UserRegisterDto user)
         {
-            ServiceResponse<int> response = new();
+
             if (userRepository.EmailIfExistsAsync(user.Email).Result == true)
             {
-                response.Success = false;
-                response.Message = "Email Already Exists";
-                return response;
+                return Result<string>.Failure("Email Already Exists.");
             }
             else if (userRepository.MobileNumerIfExists(user.Mobile).Result == true)
             {
-                response.Success = false;
-                response.Message = "Phone Number Already Exists";
-                return response;
+                return Result<string>.Failure("Mobile Number already Exists.");
             }
             else if (userRepository.EmailIfExistsAsync(user.Email).Result == true && userRepository.MobileNumerIfExists(user.Mobile).Result == true)
             {
-                response.Success = false;
-                response.Message = "Email & Phone number Already Exists";
-                return response;
+                return Result<string>.Failure("Email already Exists.");
+
             }
-            
+
             UserDto userDto = new UserDto();
             var userToCreate = mapper.Map<UserDto>(user);
             CreateHashPassword(user.Password, out byte[] passwordHash, out byte[] passwordSalt);
@@ -74,9 +75,7 @@ namespace Blog.Services.AuthService
             userToCreate.PasswordSalt = passwordSalt;
 
             userRepository.CreateUserAsync(userToCreate);
-            response.Success = true;
-            response.Message = "Regsitered Successsyfully";
-            return response;
+            return Result<string>.Success("User created successfully");
         }
 
 
