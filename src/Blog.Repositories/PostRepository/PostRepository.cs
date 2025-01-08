@@ -3,7 +3,9 @@ using Blog.Dtos.Posts;
 using Blog.Models;
 using Blog.Models.UserModel;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -46,6 +48,25 @@ namespace Blog.Repositories.PostRepository
             return updatePost;
         }
 
-       
+        public async Task<List<Post>> GetAllPost()
+        {
+          var blogs =  await blogContext.Posts.ToListAsync();
+          return blogs;
+        }
+
+        public async Task<Post> GetPostById(int id)
+        {
+            var post = await blogContext.Posts.FirstOrDefaultAsync(x => x.Id == id);
+            return post;
+        }
+
+        public async Task<Post> DeletePost(int id)
+        {
+            var post = await blogContext.Posts.FirstOrDefaultAsync(x => x.Id == id);
+            blogContext.Posts.Remove(post);
+            await blogContext.SaveChangesAsync();
+            return post;
+        }
+
     }
 }

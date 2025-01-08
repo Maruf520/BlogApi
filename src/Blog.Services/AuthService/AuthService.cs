@@ -39,7 +39,7 @@ namespace Blog.Services.AuthService
             var response = new LoginResponse();
 
             response.Token = token;
-            response.ExpiresInSeconds = 3600;
+            response.ExpiresInSeconds = 7000;
             response.User.FirstName = result.FirstName;
             response.User.FirstName = result.FirstName;
             response.User.LastName = result.LastName;

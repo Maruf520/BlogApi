@@ -25,7 +25,7 @@ namespace Blog.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> CreatePost(CreatePostDto createPostDto)
         {
-            var x = await postService.CreatePostAsync(createPostDto);
+            var x = await postService.CreatePostAsync(createPostDto, GetUserId());
             return Ok(x);
         
         }
@@ -34,8 +34,28 @@ namespace Blog.Api.Controllers
 
         public async Task<IActionResult> UpdatePost (UpdatePostDto updatePostDto)
         {
-            var updatedPost = await postService.UpdatePostAsync(updatePostDto);
+            var updatedPost = await postService.UpdatePostAsync(updatePostDto, GetUserId());
             return Ok(updatedPost);
+        }
+        [HttpGet("getallposts")]
+        public async Task<IActionResult> GetAllPosts()
+        {
+            var posts = await postService.GetAllPosts();
+            return posts.IsSuccess ? Ok(posts) : BadRequest(posts.Error.Message);
+        }
+
+        [HttpGet("getpostbyid")]
+        public async Task<IActionResult> GetPostById(int Id)
+        {
+            var posts = await postService.GetPostById(Id);
+            return posts.IsSuccess ? Ok(posts) : BadRequest(posts.Error.Message);
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleetPost(int id)
+        {
+            var post = await postService.DeletePost(id);
+            return post.IsSuccess ? Ok(post) : BadRequest(post.Error.Message);
         }
 
         private int GetUserId() => int.Parse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));

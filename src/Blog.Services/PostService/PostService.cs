@@ -7,9 +7,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Blog.Services.PostService
@@ -17,48 +14,67 @@ namespace Blog.Services.PostService
     [Authorize]
     public class PostService : IPostService
     {
-        private readonly IUserRepository userRepository;
-        private readonly IPostRepository postRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IPostRepository _postRepository;
         private readonly IMapper mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
         public PostService(IPostRepository postRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository)
         {
-            this.postRepository = postRepository;
+            this._postRepository = postRepository;
             this.mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
-            this.userRepository = userRepository;
+            this._userRepository = userRepository;
         }
 
-        public async Task<PostDto> CreatePostAsync(CreatePostDto createPostDto)
+        public async Task<Result<string>> CreatePostAsync(CreatePostDto createPostDto, int userId)
         {
-            var userid = 1;
+            var userid = userId;
             var userToCreate = mapper.Map<Post>(createPostDto);
             userToCreate.CreatedAt = DateTime.Now;
-            userToCreate.User = userRepository.GetById(userid);
+            userToCreate.User = _userRepository.GetById(userid);
 
-            var createPost = await postRepository.CreateAsync(userToCreate);
+            var createPost = await _postRepository.CreateAsync(userToCreate);
 
-            return mapper.Map<PostDto>(createPost);
-            
+            return Result<string>.Success("Post Created Successfully");
+
         }
 
-        public async Task<PostDto> UpdatePostAsync (UpdatePostDto updatePostDto)
+        public async Task<Result<string>> UpdatePostAsync(UpdatePostDto updatePostDto, int userId)
         {
 
-            var userid = 1;
-            var userPost = await postRepository.GetById(userid, updatePostDto.Id);
+            var userid = userId;
+            var userPost = await _postRepository.GetById(userid, updatePostDto.Id);
             userPost.Body = updatePostDto.Body;
             userPost.Title = updatePostDto.Title;
             userPost.UpdatedAt = DateTime.Now;
-            userPost.User = userRepository.GetById(userid);
-            userPost.Address = updatePostDto.Address;
-            userPost.NeededAt = updatePostDto.NeededAt;
-            userPost.BloodGrop = updatePostDto.BloodGrop;
-            userPost.Quantity = updatePostDto.Quantity;
+            userPost.User = _userRepository.GetById(userid);
             var mappedpost = mapper.Map<Post>(userPost);
-            var postToUpdate = await postRepository.UpdateAsync(mappedpost);
+            var postToUpdate = await _postRepository.UpdateAsync(mappedpost);
 
-            return (mapper.Map<PostDto>(postToUpdate));
+            return Result<string>.Success("Post updated Successfully");
+        }
+
+        public async Task<Result<List<PostDto>>> GetAllPosts()
+        {
+
+            var posts = await _postRepository.GetAllPost();
+
+            var allPOsts = (mapper.Map<List<PostDto>>(posts));
+
+            return Result<List<PostDto>>.Success(allPOsts);
+        }
+        public async Task<Result<PostDto>> GetPostById(int id)
+        {
+            var post = await _postRepository.GetPostById(id);
+            var result = mapper.Map<PostDto>(post);
+
+            return Result<PostDto>.Success(result);
+        }
+        public async Task<Result<string>> DeletePost(int id)
+        {
+            var post = await _postRepository.DeletePost(id);
+
+            return Result<string>.Success("Post Deleted succesfully");
         }
     }
 }

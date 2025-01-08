@@ -32,7 +32,7 @@ namespace Blog.Api.Controllers
         public async Task<IActionResult> Login(UserLoginDto userLoginDto)
         {
             var response = await authService.Login(userLoginDto);
-            return response.IsSuccess ? Ok(response.Data) : BadRequest(response.Error.Message);
+            return response.IsSuccess ? Ok(response.Data) : BadRequest(response);
         }
     }
 }
