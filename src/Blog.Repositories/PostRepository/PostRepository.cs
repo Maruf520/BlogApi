@@ -15,9 +15,9 @@ namespace Blog.Repositories.PostRepository
     public class PostRepository : IPostRepository
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly BlogContext blogContext;
+        private readonly ApplicationDbContext blogContext;
 
-        public PostRepository(IHttpContextAccessor httpContextAccessor, BlogContext blogContext)
+        public PostRepository(IHttpContextAccessor httpContextAccessor, ApplicationDbContext blogContext)
         {
             _httpContextAccessor = httpContextAccessor;
             this.blogContext = blogContext;
@@ -33,9 +33,9 @@ namespace Blog.Repositories.PostRepository
             return createPostDto;
         }
 
-        public async Task<Post> GetById(int postId, int userId)
+        public async Task<Post> GetById(Guid userId, int postId)
         {
-            var post =  blogContext.Posts.FirstOrDefault(x => x.Id == postId && x.User.Id == userId);
+            var post =  blogContext.Posts.FirstOrDefault(x => x.Id == postId && x.UserId == userId);
             return post;
         }
 

@@ -3,6 +3,7 @@ using Blog.Services.PostService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -58,7 +59,16 @@ namespace Blog.Api.Controllers
             return post.IsSuccess ? Ok(post) : BadRequest(post.Error.Message);
         }
 
-        private int GetUserId() => int.Parse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
+        private Guid GetUserId()
+        {
+            var userId = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
 
+            if (userId == null || !Guid.TryParse(userId, out var parsedUserId))
+            {
+                throw new InvalidOperationException("User ID is not available or is invalid.");
+            }
+
+            return parsedUserId;
+        }
     }
 }

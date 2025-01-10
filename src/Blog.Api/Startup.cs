@@ -59,7 +59,7 @@ namespace Blog.Api
              .AddNewtonsoftJson(options =>
              options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
              );
-            services.AddDbContext<BlogContext>(x => x.UseSqlServer(Configuration.GetConnectionString("Connection"), optionsBuilder => optionsBuilder.MigrationsAssembly("Blog.Api")));
+            services.AddDbContext<ApplicationDbContext>(x => x.UseSqlServer(Configuration.GetConnectionString("Connection"), optionsBuilder => optionsBuilder.MigrationsAssembly("Blog.Api")));
             services.AddScoped<IUserExtentionService, UserExtentionService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserRepository, UserRepository>();

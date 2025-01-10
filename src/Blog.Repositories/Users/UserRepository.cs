@@ -12,9 +12,9 @@ namespace Blog.Repositories.Users
 {
     public class UserRepository : IUserRepository
     {
-        private readonly BlogContext context;
+        private readonly ApplicationDbContext context;
         private readonly IMapper mapper;
-        public UserRepository(BlogContext context, IMapper mapper)
+        public UserRepository(ApplicationDbContext context, IMapper mapper)
         {
             this.context = context;
             this.mapper = mapper;
@@ -30,16 +30,16 @@ namespace Blog.Repositories.Users
 
         public void CreateUserAsync(UserDto user)                                                     
         {
-            var usertomap = mapper.Map<User>(user);
+            var usertomap = mapper.Map<ApplicationUser>(user);
             context.Users.Add(usertomap);
             context.SaveChanges();
         }
-        public User GetById(int id)
+        public ApplicationUser GetById(Guid id)
         {
             var user = context.Users.FirstOrDefault(x => x.Id == id);
             return user;
         }
-        public User GetByEmail(string email)
+        public ApplicationUser GetByEmail(string email)
         {
             var user = context.Users.FirstOrDefault(c => c.Email == email);
             return user;

@@ -26,12 +26,12 @@ namespace Blog.Services.PostService
             this._userRepository = userRepository;
         }
 
-        public async Task<Result<string>> CreatePostAsync(CreatePostDto createPostDto, int userId)
+        public async Task<Result<string>> CreatePostAsync(CreatePostDto createPostDto, Guid userId)
         {
             var userid = userId;
             var userToCreate = mapper.Map<Post>(createPostDto);
             userToCreate.CreatedAt = DateTime.Now;
-            userToCreate.User = _userRepository.GetById(userid);
+            userToCreate.UserId = _userRepository.GetById(userid).Id;
 
             var createPost = await _postRepository.CreateAsync(userToCreate);
 
@@ -39,7 +39,7 @@ namespace Blog.Services.PostService
 
         }
 
-        public async Task<Result<string>> UpdatePostAsync(UpdatePostDto updatePostDto, int userId)
+        public async Task<Result<string>> UpdatePostAsync(UpdatePostDto updatePostDto, Guid userId)
         {
 
             var userid = userId;
@@ -47,7 +47,7 @@ namespace Blog.Services.PostService
             userPost.Body = updatePostDto.Body;
             userPost.Title = updatePostDto.Title;
             userPost.UpdatedAt = DateTime.Now;
-            userPost.User = _userRepository.GetById(userid);
+            userPost.UserId = _userRepository.GetById(userid).Id;
             var mappedpost = mapper.Map<Post>(userPost);
             var postToUpdate = await _postRepository.UpdateAsync(mappedpost);
 

@@ -12,7 +12,7 @@ namespace Blog.Repositories.PostRepository
     {
         Task<Post> CreateAsync(Post createPostDto);
         Task<Post> UpdateAsync(Post updatePost);
-        Task<Post> GetById(int postId, int userId);
+        Task<Post> GetById(Guid userId, int postId);
         Task<List<Post>> GetAllPost();
         Task<Post> GetPostById(int id);
         Task<Post> DeletePost(int id);

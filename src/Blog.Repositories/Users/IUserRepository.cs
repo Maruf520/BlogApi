@@ -14,7 +14,7 @@ namespace Blog.Repositories.Users
         Task<bool> EmailIfExistsAsync (string email);
         Task<bool> MobileNumerIfExists(string number);
         void CreateUserAsync(UserDto user);
-        User GetById(int id);
-        User GetByEmail(string email);
+        ApplicationUser GetById(Guid id);
+        ApplicationUser GetByEmail(string email);
     }
 }

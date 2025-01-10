@@ -10,9 +10,9 @@ namespace Blog.Services.PostService
 {
     public interface IPostService
     {
-        Task<Result<string>> UpdatePostAsync(UpdatePostDto updatePostDto, int userId);
+        Task<Result<string>> UpdatePostAsync(UpdatePostDto updatePostDto, Guid userId);
         Task<Result<List<PostDto>>> GetAllPosts();
-        Task<Result<string>> CreatePostAsync(CreatePostDto createPostDto, int userId);
+        Task<Result<string>> CreatePostAsync(CreatePostDto createPostDto, Guid userId);
         Task<Result<PostDto>> GetPostById(int id);
         Task<Result<string>> DeletePost(int id);
     }

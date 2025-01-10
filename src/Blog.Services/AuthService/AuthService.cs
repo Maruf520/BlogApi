@@ -30,10 +30,10 @@ namespace Blog.Services.AuthService
             {
                 return Result<LoginResponse>.Failure("Email not found.");
             }
-            else if (!VerifyPasswordHash(userDto.Password, userToGet.PasswordHash, userToGet.PasswordSalt))
-            {
-                return Result<LoginResponse>.Failure("Wromg Password");
-            }
+            //else if (!VerifyPasswordHash(userDto.Password, userToGet.PasswordHash, userToGet.PasswordSalt))
+            //{
+            //    return Result<LoginResponse>.Failure("Wromg Password");
+            //}
            var token = await userExtentionService.GenerateAccessToken(userToGet);
            var result = userRepository.GetByEmail(userDto.Email);
             var response = new LoginResponse();

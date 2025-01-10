@@ -12,7 +12,7 @@ namespace Blog.Services.UserExtentionService
 {
     public class UserExtentionService : IUserExtentionService
     { 
-        public async Task<string> GenerateAccessToken(User user)
+        public async Task<string> GenerateAccessToken(ApplicationUser user)
         {
             List<Claim> claims = new List<Claim>
             {

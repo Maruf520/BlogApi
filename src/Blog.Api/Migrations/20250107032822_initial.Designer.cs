@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Blog.Api.Migrations
 {
-    [DbContext(typeof(BlogContext))]
+    [DbContext(typeof(ApplicationDbContext))]
     [Migration("20250107032822_initial")]
     partial class initial
     {

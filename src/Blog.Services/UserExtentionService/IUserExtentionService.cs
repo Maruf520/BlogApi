@@ -9,6 +9,6 @@ namespace Blog.Services.UserExtentionService
 {
     public interface IUserExtentionService
     {
-        Task<string> GenerateAccessToken(User user);
+        Task<string> GenerateAccessToken(ApplicationUser user);
     }
 }

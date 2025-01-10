@@ -14,11 +14,11 @@ namespace Blog.Api
     {
         public AutoMapperProfile()
         {
-            CreateMap<UserDto, User>();
+            CreateMap<UserDto, ApplicationUser>();
             CreateMap<Post, PostDto>();
             CreateMap<CreatePostDto, PostDto>();
             CreateMap<UpdatePostDto, PostDto>();
-            CreateMap<User, GetUserDto>();
+            CreateMap<ApplicationUser, GetUserDto>();
             CreateMap<CreatePostDto, Post>();
             CreateMap<UserRegisterDto, UserDto>();
         }
