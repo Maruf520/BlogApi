@@ -1,6 +1,6 @@
 ﻿namespace Blog.Services.UserService
 {
-    internal class IUserService
+    public interface IUserService
     {
     }
 }

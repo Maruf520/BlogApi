@@ -1,10 +1,14 @@
+using Blog.Api.Handlers;
 using Blog.Models;
 using Blog.Repositories.PostRepository;
 using Blog.Repositories.Users;
+using Auth = Blog.Services.AuthorizationService;
 using Blog.Services.AuthService;
 using Blog.Services.PostService;
 using Blog.Services.UserExtentionService;
+using Blog.Services.UserService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -23,6 +27,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Blog.Models.UserModel;
+using Microsoft.AspNetCore.Identity;
 
 namespace Blog.Api
 {
@@ -38,7 +44,9 @@ namespace Blog.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.AddIdentity<ApplicationUser, IdentityRole<Guid>>()
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
             services.AddControllers();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddAutoMapper(typeof(Startup));
@@ -67,6 +75,10 @@ namespace Blog.Api
             services.AddHttpContextAccessor();
             services.AddScoped<IPostService, PostService>();
             services.AddScoped<IPostRepository, PostRepository>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<Auth.IAuthorizationService, Auth.AuthorizationService>();
+            services.AddScoped<IAuthorizationHandler, PermissionHandler>();
+
 
 
             services.AddSwaggerGen(setup =>
