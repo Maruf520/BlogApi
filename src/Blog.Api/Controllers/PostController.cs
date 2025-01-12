@@ -33,7 +33,7 @@ namespace Blog.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> CreatePost(CreatePostDto createPostDto)
         {
-            var x = await postService.CreatePostAsync(createPostDto, Guid.NewGuid());
+            var x = await postService.CreatePostAsync(createPostDto);
             return Ok(x);
         
         }
@@ -42,7 +42,7 @@ namespace Blog.Api.Controllers
 
         public async Task<IActionResult> UpdatePost (UpdatePostDto updatePostDto)
         {
-            var updatedPost = await postService.UpdatePostAsync(updatePostDto, GetUserId());
+            var updatedPost = await postService.UpdatePostAsync(updatePostDto);
             return Ok(updatedPost);
         }
         [HttpGet("getallposts")]

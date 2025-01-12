@@ -1,5 +1,7 @@
-﻿using Blog.Dtos.Users;
+﻿using Blog.Dtos.Comment;
+using Blog.Dtos.Users;
 using System;
+using System.Collections.Generic;
 
 namespace Blog.Dtos.Posts
 {
@@ -11,6 +13,7 @@ namespace Blog.Dtos.Posts
         public string Body { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
-        public GetUserDto User { get; set; }
+        public GetUserDto Author { get; set; }
+        public List<CommentDto> Comments { get; set; }
     }
 }

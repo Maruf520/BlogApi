@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Blog.Dtos.Comment;
 using Blog.Dtos.Posts;
 using Blog.Dtos.Users;
 using Blog.Models.Posts;
@@ -22,6 +23,8 @@ namespace Blog.Api
             CreateMap<CreatePostDto, Post>();
             CreateMap<UserRegisterDto, UserDto>();
             CreateMap<UserRegisterDto, ApplicationUser>().ReverseMap();
+            CreateMap<Comment, CommentDto>().ReverseMap();
+            CreateMap<Comment, CreateCommentDto>().ReverseMap();
         }
     }
 }

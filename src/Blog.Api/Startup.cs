@@ -1,9 +1,11 @@
 using Blog.Api.Handlers;
 using Blog.Models;
 using Blog.Models.UserModel;
+using Blog.Repositories;
 using Blog.Repositories.PostRepository;
 using Blog.Repositories.Users;
 using Blog.Services.AuthService;
+using Blog.Services.CommentService;
 using Blog.Services.Helpers;
 using Blog.Services.PostService;
 using Blog.Services.UserExtentionService;
@@ -111,6 +113,8 @@ namespace Blog.Api
             services.AddScoped<Auth.IAuthorizationService, Auth.AuthorizationService>();
             services.AddScoped<IAuthorizationHandler, PermissionHandler>();
             services.AddScoped<IApplicationUserHelper, ApplicationUserHelper>();
+            services.AddScoped<IRepository, Repository>();
+            services.AddScoped<ICommentService, CommentService>();
 
 
             services.AddSwaggerGen(setup =>

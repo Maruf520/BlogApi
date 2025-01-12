@@ -14,7 +14,7 @@ namespace Blog.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin, User")]
     public class PermissionsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
