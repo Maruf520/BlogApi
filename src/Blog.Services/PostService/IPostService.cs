@@ -13,7 +13,7 @@ namespace Blog.Services.PostService
         Task<Result<string>> UpdatePostAsync(UpdatePostDto updatePostDto, Guid userId);
         Task<Result<List<PostDto>>> GetAllPosts();
         Task<Result<string>> CreatePostAsync(CreatePostDto createPostDto, Guid userId);
-        Task<Result<PostDto>> GetPostById(int id);
-        Task<Result<string>> DeletePost(int id);
+        Task<Result<PostDto>> GetPostById(string id);
+        Task<Result<string>> DeletePost(string id);
     }
 }

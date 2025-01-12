@@ -1,9 +1,6 @@
-﻿using Blog.Dtos.Posts;
-using Blog.Models;
+﻿using Blog.Models.Posts;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Blog.Repositories.PostRepository
@@ -12,9 +9,9 @@ namespace Blog.Repositories.PostRepository
     {
         Task<Post> CreateAsync(Post createPostDto);
         Task<Post> UpdateAsync(Post updatePost);
-        Task<Post> GetById(Guid userId, int postId);
+        Task<Post> GetById(Guid userId, Guid postId);
         Task<List<Post>> GetAllPost();
-        Task<Post> GetPostById(int id);
-        Task<Post> DeletePost(int id);
+        Task<Post> GetPostById(Guid id);
+        Task<Post> DeletePost(Guid id);
     }
 }

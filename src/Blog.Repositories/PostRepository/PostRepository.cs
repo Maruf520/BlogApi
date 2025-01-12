@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Blog.Dtos.Posts;
 using Blog.Models;
+using Blog.Models.Posts;
 using Blog.Models.UserModel;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -15,56 +16,65 @@ namespace Blog.Repositories.PostRepository
     public class PostRepository : IPostRepository
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly ApplicationDbContext blogContext;
+        private readonly ApplicationDbContext _blogContext;
 
         public PostRepository(IHttpContextAccessor httpContextAccessor, ApplicationDbContext blogContext)
         {
             _httpContextAccessor = httpContextAccessor;
-            this.blogContext = blogContext;
+            _blogContext = blogContext;
         }
 
-/*        private int GetUserId() => int.Parse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));*/
+       private int GetUserId() => int.Parse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
 
         public async Task<Post> CreateAsync(Post createPostDto)
         {
-            await blogContext.Posts.AddAsync(createPostDto);
-            await blogContext.SaveChangesAsync();
+            try
+            {
 
-            return createPostDto;
+                await _blogContext.Posts.AddAsync(createPostDto);
+                await _blogContext.SaveChangesAsync();
+
+                return createPostDto;
+            }
+            catch(Exception ex)
+            {
+                throw new Exception();
+            }
+
         }
 
-        public async Task<Post> GetById(Guid userId, int postId)
+        public async Task<Post> GetById(Guid userId, Guid postId)
         {
-            var post =  blogContext.Posts.FirstOrDefault(x => x.Id == postId && x.UserId == userId);
+            var post =  _blogContext.Posts.FirstOrDefault(x => x.Id == postId && x.UserId == userId);
             return post;
         }
 
         public  async Task<Post> UpdateAsync (Post updatePost)
         {
 
-             blogContext.Posts.Update(updatePost);
-             blogContext.SaveChanges();
+             _blogContext.Posts.Update(updatePost);
+             _blogContext.SaveChanges();
 
             return updatePost;
         }
 
         public async Task<List<Post>> GetAllPost()
         {
-          var blogs =  await blogContext.Posts.ToListAsync();
+          var blogs =  await _blogContext.Posts.ToListAsync();
           return blogs;
         }
 
-        public async Task<Post> GetPostById(int id)
+        public async Task<Post> GetPostById(Guid id)
         {
-            var post = await blogContext.Posts.FirstOrDefaultAsync(x => x.Id == id);
+            var post = await _blogContext.Posts.FirstOrDefaultAsync(x => x.Id == id);
             return post;
         }
 
-        public async Task<Post> DeletePost(int id)
+        public async Task<Post> DeletePost(Guid id)
         {
-            var post = await blogContext.Posts.FirstOrDefaultAsync(x => x.Id == id);
-            blogContext.Posts.Remove(post);
-            await blogContext.SaveChangesAsync();
+            var post = await _blogContext.Posts.FirstOrDefaultAsync(x => x.Id == id);
+            _blogContext.Posts.Remove(post);
+            await _blogContext.SaveChangesAsync();
             return post;
         }
 

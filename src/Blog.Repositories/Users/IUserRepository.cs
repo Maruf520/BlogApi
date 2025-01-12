@@ -13,8 +13,8 @@ namespace Blog.Repositories.Users
 
         Task<bool> EmailIfExistsAsync (string email);
         Task<bool> MobileNumerIfExists(string number);
-        void CreateUserAsync(UserDto user);
-        ApplicationUser GetById(Guid id);
+        Task CreateUserAsync(UserRegisterDto user);
+        Task<ApplicationUser> GetById(Guid id);
         ApplicationUser GetByEmail(string email);
     }
 }

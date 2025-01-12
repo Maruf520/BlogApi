@@ -1,7 +1,9 @@
-﻿using Blog.Models.UserModel;
+﻿using Blog.Models.Posts;
+using Blog.Models.UserModel;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Reflection.Emit;
 
 namespace Blog.Models
 {
@@ -13,6 +15,9 @@ namespace Blog.Models
         public DbSet<Post> Posts { get; set; }
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<RolePermission> RolePermissions { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<UserRole> UserRoles { get; set; } // Add UserRole DbSet here
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -49,14 +54,31 @@ namespace Blog.Models
                 entity.Property(p => p.Body)
                     .IsRequired() 
                     .HasMaxLength(1000); 
-
-                entity.Property(p => p.CreatedAt)
-                    .IsRequired(); 
-
-                entity.Property(p => p.UpdatedAt)
-                    .IsRequired(false);
             });
+            builder.Entity<UserRole>(entity =>
+            {
+                entity.HasOne(ur => ur.User)
+                      .WithMany(u => u.UserRoles) 
+                      .HasForeignKey(ur => ur.UserId);
 
+                entity.HasOne(ur => ur.Role)
+                      .WithMany(r => r.UserRoles)
+                      .HasForeignKey(ur => ur.RoleId);
+            });
+            builder.Entity<Like>(entity =>
+            {
+                entity.HasOne(l => l.Post) 
+                      .WithMany(p => p.Likes) 
+                      .HasForeignKey(l => l.PostId) 
+                      .OnDelete(DeleteBehavior.NoAction); 
+            });
+            builder.Entity<Comment>(entity =>
+            {
+                entity.HasOne(x => x.Post)
+                .WithMany(x => x.Comments)
+                .HasForeignKey(x => x.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
         }
     }
 }

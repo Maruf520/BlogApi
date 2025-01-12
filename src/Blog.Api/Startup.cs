@@ -1,9 +1,10 @@
 using Blog.Api.Handlers;
 using Blog.Models;
+using Blog.Models.UserModel;
 using Blog.Repositories.PostRepository;
 using Blog.Repositories.Users;
-using Auth = Blog.Services.AuthorizationService;
 using Blog.Services.AuthService;
+using Blog.Services.Helpers;
 using Blog.Services.PostService;
 using Blog.Services.UserExtentionService;
 using Blog.Services.UserService;
@@ -12,23 +13,18 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Blog.Models.UserModel;
-using Microsoft.AspNetCore.Identity;
+using Auth = Blog.Services.AuthorizationService;
 
 namespace Blog.Api
 {
@@ -44,30 +40,66 @@ namespace Blog.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddIdentity<ApplicationUser, IdentityRole<Guid>>()
-            .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddDefaultTokenProviders();
             services.AddControllers();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddAutoMapper(typeof(Startup));
+
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
+            .AddJwtBearer(options =>
+            {
+                var jwtSettings = Configuration.GetSection("JWT");
+
+                var key = Encoding.UTF8.GetBytes(jwtSettings["Secret"]);
+
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII
-                .GetBytes("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")),
-                ValidateIssuer = false,
-                ValidateAudience = false
-                };
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
 
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtSettings["ValidIssuer"],  
+
+                    ValidateAudience = true,
+                    ValidAudience = jwtSettings["ValidAudience"],  
+
+                    ValidateLifetime = true, 
+                    ClockSkew = TimeSpan.Zero 
+                };
+            });
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("Edit", policy =>
+                {
+                    // Define your policy requirement here.
+                    // This could be role-based or permission-based.
+                    policy.RequireClaim("Permission", "Edit");
                 });
-             services.AddControllersWithViews()
-             .AddNewtonsoftJson(options =>
-             options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
-             );
+            });
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("Edit", policy =>
+                {
+                    policy.AddRequirements(new PermissionRequirement("Edit"));
+                });
+            });
+            services.AddScoped<IAuthorizationHandler, PermissionHandler>();
+
+            services.AddAuthorization();
+            services.AddMvc();
+
+            services.AddControllersWithViews()
+            .AddNewtonsoftJson(options =>
+            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+            );
+
             services.AddDbContext<ApplicationDbContext>(x => x.UseSqlServer(Configuration.GetConnectionString("Connection"), optionsBuilder => optionsBuilder.MigrationsAssembly("Blog.Api")));
+            services.AddIdentity<ApplicationUser, Role>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders()
+                .AddSignInManager()
+                .AddUserManager<UserManager<ApplicationUser>>()
+                .AddRoleManager<RoleManager<Role>>();
             services.AddScoped<IUserExtentionService, UserExtentionService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserRepository, UserRepository>();
@@ -78,12 +110,11 @@ namespace Blog.Api
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<Auth.IAuthorizationService, Auth.AuthorizationService>();
             services.AddScoped<IAuthorizationHandler, PermissionHandler>();
-
+            services.AddScoped<IApplicationUserHelper, ApplicationUserHelper>();
 
 
             services.AddSwaggerGen(setup =>
             {
-                // Include 'SecurityScheme' to use JWT Authentication
                 var jwtSecurityScheme = new OpenApiSecurityScheme
                 {
                     BearerFormat = "JWT",

@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Blog.Dtos.Posts;
 using Blog.Dtos.Users;
-using Blog.Models;
+using Blog.Models.Posts;
 using Blog.Models.UserModel;
 using System;
 using System.Collections.Generic;
@@ -15,12 +15,13 @@ namespace Blog.Api
         public AutoMapperProfile()
         {
             CreateMap<UserDto, ApplicationUser>();
-            CreateMap<Post, PostDto>();
+            CreateMap<Post, PostDto>().ReverseMap();
             CreateMap<CreatePostDto, PostDto>();
             CreateMap<UpdatePostDto, PostDto>();
             CreateMap<ApplicationUser, GetUserDto>();
             CreateMap<CreatePostDto, Post>();
             CreateMap<UserRegisterDto, UserDto>();
+            CreateMap<UserRegisterDto, ApplicationUser>().ReverseMap();
         }
     }
 }

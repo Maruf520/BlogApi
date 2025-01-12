@@ -1,10 +1,14 @@
 ﻿using AutoMapper;
 using Blog.Dtos.Posts;
 using Blog.Models;
+using Blog.Models.Posts;
+using Blog.Repositories;
 using Blog.Repositories.PostRepository;
 using Blog.Repositories.Users;
+using Blog.Services.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -18,20 +22,26 @@ namespace Blog.Services.PostService
         private readonly IPostRepository _postRepository;
         private readonly IMapper mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public PostService(IPostRepository postRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository)
+        private readonly IApplicationUserHelper _applicationUserHelper;
+        //private readonly IRepository  _repository;
+        public PostService(IPostRepository postRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository, IApplicationUserHelper applicationUserHelper)
         {
             this._postRepository = postRepository;
             this.mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
             this._userRepository = userRepository;
+            _applicationUserHelper = applicationUserHelper;
+            // _repository = repository;
         }
 
         public async Task<Result<string>> CreatePostAsync(CreatePostDto createPostDto, Guid userId)
         {
-            var userid = userId;
+            
             var userToCreate = mapper.Map<Post>(createPostDto);
+            userToCreate.CreatedBy = _applicationUserHelper.UserId;
+            userToCreate.UserId = Guid.Parse(_applicationUserHelper.UserId);
             userToCreate.CreatedAt = DateTime.Now;
-            userToCreate.UserId = _userRepository.GetById(userid).Id;
+            userToCreate.Id = Guid.NewGuid();
 
             var createPost = await _postRepository.CreateAsync(userToCreate);
 
@@ -43,11 +53,9 @@ namespace Blog.Services.PostService
         {
 
             var userid = userId;
-            var userPost = await _postRepository.GetById(userid, updatePostDto.Id);
+            var userPost = await _postRepository.GetById(userid, Guid.Parse(updatePostDto.Id));
             userPost.Body = updatePostDto.Body;
             userPost.Title = updatePostDto.Title;
-            userPost.UpdatedAt = DateTime.Now;
-            userPost.UserId = _userRepository.GetById(userid).Id;
             var mappedpost = mapper.Map<Post>(userPost);
             var postToUpdate = await _postRepository.UpdateAsync(mappedpost);
 
@@ -56,23 +64,22 @@ namespace Blog.Services.PostService
 
         public async Task<Result<List<PostDto>>> GetAllPosts()
         {
-
             var posts = await _postRepository.GetAllPost();
 
             var allPOsts = (mapper.Map<List<PostDto>>(posts));
 
             return Result<List<PostDto>>.Success(allPOsts);
         }
-        public async Task<Result<PostDto>> GetPostById(int id)
+        public async Task<Result<PostDto>> GetPostById(string id)
         {
-            var post = await _postRepository.GetPostById(id);
+            var post = await _postRepository.GetPostById(Guid.Parse(id));
             var result = mapper.Map<PostDto>(post);
 
             return Result<PostDto>.Success(result);
         }
-        public async Task<Result<string>> DeletePost(int id)
+        public async Task<Result<string>> DeletePost(string id)
         {
-            var post = await _postRepository.DeletePost(id);
+            var post = await _postRepository.DeletePost(Guid.Parse(id));
 
             return Result<string>.Success("Post Deleted succesfully");
         }

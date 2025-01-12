@@ -1,5 +1,6 @@
 ﻿using Blog.Dtos.Posts;
 using Blog.Services.PostService;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +12,7 @@ namespace Blog.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class PostController : ControllerBase
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -21,12 +22,18 @@ namespace Blog.Api.Controllers
             _httpContextAccessor = httpContextAccessor;
             this.postService = postService;
         }
-       
+
+        [HttpGet("get-posts")]
+        public IActionResult GetPosts()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return Ok(new { Message = "Authentication works!", UserId = userId });
+        }
 
         [HttpPost]
         public async Task<IActionResult> CreatePost(CreatePostDto createPostDto)
         {
-            var x = await postService.CreatePostAsync(createPostDto, GetUserId());
+            var x = await postService.CreatePostAsync(createPostDto, Guid.NewGuid());
             return Ok(x);
         
         }
@@ -46,14 +53,14 @@ namespace Blog.Api.Controllers
         }
 
         [HttpGet("getpostbyid")]
-        public async Task<IActionResult> GetPostById(int Id)
+        public async Task<IActionResult> GetPostById(string Id)
         {
             var posts = await postService.GetPostById(Id);
             return posts.IsSuccess ? Ok(posts) : BadRequest(posts.Error.Message);
         }
 
         [HttpDelete]
-        public async Task<IActionResult> DeleetPost(int id)
+        public async Task<IActionResult> DeleetPost(string id)
         {
             var post = await postService.DeletePost(id);
             return post.IsSuccess ? Ok(post) : BadRequest(post.Error.Message);

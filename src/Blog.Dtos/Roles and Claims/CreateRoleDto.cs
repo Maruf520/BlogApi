@@ -12,6 +12,6 @@ namespace Blog.Dtos.Roles_and_Claims
         [StringLength(200)]
         public string Description { get; set; }
 
-        public List<int> PermissionIds { get; set; }
+        public List<string> PermissionIds { get; set; }
     }
 }
