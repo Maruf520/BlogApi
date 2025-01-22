@@ -31,6 +31,14 @@ namespace Blog.Api.Controllers
             return response.IsSuccess ? Ok(response) : BadRequest(response);
 
         }
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetUser(string userId)
+        {
+            var response = await authService.GetUser(userId);
+
+            return response.IsSuccess ? Ok(response) : BadRequest(response);
+
+        }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(UserLoginDto userLoginDto)

@@ -6,7 +6,6 @@ namespace Blog.Models.UserModel
 {
     public class ApplicationUser : IdentityUser<Guid>
     {
-        public Guid Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Mobile { get; set; }

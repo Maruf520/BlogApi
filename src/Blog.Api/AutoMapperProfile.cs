@@ -15,7 +15,7 @@ namespace Blog.Api
     {
         public AutoMapperProfile()
         {
-            CreateMap<UserDto, ApplicationUser>();
+            CreateMap<UserDto, ApplicationUser>().ReverseMap();
             CreateMap<Post, PostDto>().ReverseMap();
             CreateMap<CreatePostDto, PostDto>();
             CreateMap<UpdatePostDto, PostDto>();

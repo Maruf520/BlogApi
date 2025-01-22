@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using Blog.Dtos.Account;
 using Blog.Dtos.Users;
 using Blog.Models;
 using Blog.Models.UserModel;
 using Blog.Repositories.Users;
 using Blog.Services.UserExtentionService;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -13,6 +15,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,19 +26,19 @@ namespace Blog.Services.AuthService
         private readonly IMapper mapper;
         private readonly IUserRepository userRepository;
         private readonly IUserExtentionService userExtentionService;
-        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
-        public AuthService(IUserRepository userRepository, IUserExtentionService userExtentionService, IMapper mapper, SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, ApplicationDbContext context, IConfiguration configuration)
+        private readonly IHttpContextAccessor _contextAccessor;
+        public AuthService(IUserRepository userRepository, IUserExtentionService userExtentionService, IMapper mapper, UserManager<ApplicationUser> userManager, ApplicationDbContext context, IConfiguration configuration, IHttpContextAccessor contextAccessor)
         {
             this.userRepository = userRepository;
             this.userExtentionService = userExtentionService;
             this.mapper = mapper;
             _userManager = userManager;
-            _signInManager = signInManager;
             _context = context;
             _configuration = configuration;
+            _contextAccessor = contextAccessor;
         }
 
         public async Task<Result<LoginResponse>> Login(UserLoginDto userDto)
@@ -148,6 +151,53 @@ namespace Blog.Services.AuthService
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
                 ExpiresInSeconds = (int)expiration.Subtract(DateTime.UtcNow).TotalSeconds
             };
+        }
+
+        public async Task<Result<UserDto>> GetUser(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null) 
+            {
+                var result = mapper.Map<UserDto>(user);
+                return Result<UserDto>.Success(result);
+            }
+            return Result<UserDto>.Failure("Failed");
+        }
+
+
+        public async Task<Result<string>> GeneratePasswordToken(string email)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user is null)
+                {
+                    return Result<string>.Failure("User Not Found. Please contact with admin.");
+                }
+                await _userManager.UpdateSecurityStampAsync(user);
+                var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+                return Result<string>.Success(resetToken);
+            }
+            catch (Exception ex) 
+            {
+                throw new Exception();
+            }
+        }
+        private static string GetRequestScheme(bool isHttps)
+        {
+            return isHttps ? "https" : "http";
+        }
+
+        public async Task<bool> ResetPassword(string email, string token, string newPassword)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            var verify = await _userManager.ResetPasswordAsync(user, token, newPassword);
+            if(verify.Succeeded)
+            {
+                return true;
+            }
+            return false;
+
         }
 
     }

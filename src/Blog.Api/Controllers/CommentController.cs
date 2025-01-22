@@ -37,5 +37,12 @@ namespace Blog.Api.Controllers
             var comment = await _commentService.DeleteCommentAsync(commentDto);
             return Ok(comment);
         }
+        [HttpGet("{postId}")]
+        public async Task<IActionResult> GetCommentByPostAsync(string postId)
+        {
+            var comment = await _commentService.CommentByPostAsync(postId);
+
+            return Ok(comment);
+        }
     }
 }

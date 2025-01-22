@@ -66,11 +66,11 @@ namespace Blog.Services.PostService
         public async Task<Result<List<PostDto>>> GetAllPosts()
         {
             var posts = await _repository.Query<Post>(includes: c => c.Include(p => p.Comments).Include(x => x.Author)).ToListAsync();
-            if (posts.Count == 0)
-            {
-                return Result<List<PostDto>>.Failure("No Post Found");
+            //if (posts.Count == 0)
+            //{
+            //    return Result<List<PostDto>>.Failure("No Post Found");
 
-            }
+            //}
             var allPOsts = (mapper.Map<List<PostDto>>(posts));
 
             return Result<List<PostDto>>.Success(allPOsts);

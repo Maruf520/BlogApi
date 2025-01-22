@@ -1,5 +1,6 @@
 ﻿using Blog.Dtos.Comment;
 using Blog.Models;
+using Blog.Models.Posts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,5 +14,6 @@ namespace Blog.Services.CommentService
         Task<Result<string>> DeleteCommentAsync(CreateCommentDto commentDto);
         Task<Result<string>> UpdateCommentAsync(CreateCommentDto commentDto);
         Task<Result<string>> SaveCommentAsync(CreateCommentDto commentDto);
+        Task<Result<List<Comment>>> CommentByPostAsync(string postId);
     }
 }

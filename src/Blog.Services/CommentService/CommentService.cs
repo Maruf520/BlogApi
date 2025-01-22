@@ -4,7 +4,9 @@ using Blog.Models;
 using Blog.Models.Posts;
 using Blog.Repositories;
 using Blog.Services.Helpers;
+using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Blog.Services.CommentService
@@ -36,7 +38,7 @@ namespace Blog.Services.CommentService
 
             await _repository.AddAsync(model);
 
-            return Result<string>.Success("No Post Found");
+            return Result<string>.Success("Comment Successfully added");
         }
 
         public async Task<Result<string>> UpdateCommentAsync(CreateCommentDto commentDto)
@@ -78,6 +80,23 @@ namespace Blog.Services.CommentService
             await _repository.DeleteAsync(comment);
 
             return Result<string>.Success("Comment Deleted");
+        }
+        public async Task<Result<List<Comment>>> CommentByPostAsync(string postId)
+        {
+            var post = await _repository.FirstOrDefaultAsync<Post>(X => X.Id.ToString() == postId);
+
+            if (post == null)
+            {
+                return Result<List<Comment>>.Failure("No Post Found");
+            }
+            var comment = await _repository.Query<Comment>(x => x.PostId.ToString() == postId).ToListAsync();
+            
+            if (post == null)
+            {
+                return Result<List<Comment>>.Failure("No Comment Found");
+            }
+
+            return Result<List<Comment>>.Success(comment);
         }
     }
 }
