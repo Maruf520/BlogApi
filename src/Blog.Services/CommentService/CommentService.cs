@@ -38,7 +38,7 @@ namespace Blog.Services.CommentService
 
             await _repository.AddAsync(model);
 
-            return Result<string>.Success("Comment Successfully added");
+            return Result<string>.Success(userId);
         }
 
         public async Task<Result<string>> UpdateCommentAsync(CreateCommentDto commentDto)

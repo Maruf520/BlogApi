@@ -1,4 +1,6 @@
 ﻿using Blog.Dtos.Account;
+using Blog.Dtos.Users;
+using Blog.Models;
 using Blog.Services.AuthService;
 using Blog.Services.UserService;
 using Microsoft.AspNetCore.Authorization;
@@ -28,29 +30,30 @@ namespace Blog.Api.Controllers
         }
 
         [HttpPost("request-password-reset")]
-        public async Task<IActionResult> RequestPasswordReset(string email)
+        public async Task<IActionResult> RequestPasswordReset([FromBody]PasswordResetRequestDto dto)
         {
-            var user = await _userService.GetUser(email);
-            if (user is null)
+            var user = await _userService.GetUser(dto.Email);
+            if (user.Data is null)
             {
                 return BadRequest("User Not Found. Please contact with admin.");
             }
 
-            var token = await _authService.GeneratePasswordToken(email);
-            //var url = Url.Action(nameof(ResetPassword), "Account", new { token = token, email = user.Data.Email }, GetRequestScheme(Request.IsHttps));
-            return Ok(token);
+            var token = await _authService.GeneratePasswordToken(dto.Email);
+            var tokenDto = new LoginResponse();
+            tokenDto.Token = token.Data;
+
+            return token.IsSuccess ? Ok(tokenDto) : BadRequest(token.Error.Message);
         }
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] PasswordResetDto resetDto)
         {
-            //var user = await _userService.GetUser(resetDto.Email);
             var verify = await _authService.ResetPassword(resetDto.Email, resetDto.Token, resetDto.NewPassword);
             
-            if(verify)
+            if(!verify)
             {
-                return Ok("Password has been reset successfully");
+                return BadRequest("Invalid Token");
             }
-            return BadRequest();
+            return Ok("Password Has been reset successfully.");
         }
         private static string GetRequestScheme(bool isHttps)
         {

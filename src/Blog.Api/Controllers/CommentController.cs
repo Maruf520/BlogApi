@@ -42,7 +42,7 @@ namespace Blog.Api.Controllers
         {
             var comment = await _commentService.CommentByPostAsync(postId);
 
-            return Ok(comment);
+            return comment.IsSuccess ? Ok(comment) : BadRequest(comment.Error.Message);
         }
     }
 }

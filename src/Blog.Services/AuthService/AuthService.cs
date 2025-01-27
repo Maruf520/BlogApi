@@ -18,6 +18,7 @@ using System.Security.Claims;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Blog.Services.AuthService
 {
@@ -176,7 +177,10 @@ namespace Blog.Services.AuthService
                 }
                 await _userManager.UpdateSecurityStampAsync(user);
                 var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
-                return Result<string>.Success(resetToken);
+                var encodedToken = Uri.EscapeDataString(resetToken);
+                var frontendUrl = $"http://localhost:4200/reset-password?token={encodedToken}&email={email}";
+
+                return Result<string>.Success(frontendUrl);
             }
             catch (Exception ex) 
             {
@@ -190,8 +194,9 @@ namespace Blog.Services.AuthService
 
         public async Task<bool> ResetPassword(string email, string token, string newPassword)
         {
+            var decodedToken = Uri.UnescapeDataString(token);
             var user = await _userManager.FindByEmailAsync(email);
-            var verify = await _userManager.ResetPasswordAsync(user, token, newPassword);
+            var verify = await _userManager.ResetPasswordAsync(user, decodedToken, newPassword);
             if(verify.Succeeded)
             {
                 return true;
