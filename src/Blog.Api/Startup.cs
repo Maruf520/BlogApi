@@ -6,6 +6,7 @@ using Blog.Repositories.PostRepository;
 using Blog.Repositories.Users;
 using Blog.Services.AuthService;
 using Blog.Services.CommentService;
+using Blog.Services.EmailService;
 using Blog.Services.Helpers;
 using Blog.Services.PostService;
 using Blog.Services.UserExtentionService;
@@ -115,7 +116,8 @@ namespace Blog.Api
             services.AddScoped<IApplicationUserHelper, ApplicationUserHelper>();
             services.AddScoped<IRepository, Repository>();
             services.AddScoped<ICommentService, CommentService>();
-
+            services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));
+            services.AddScoped<IEmailService, EmailService>();
 
             services.AddSwaggerGen(setup =>
             {

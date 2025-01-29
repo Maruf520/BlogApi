@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Blog.Dtos.Account;
+using Blog.Dtos.Email;
 using Blog.Dtos.Users;
 using Blog.Models;
 using Blog.Models.UserModel;
@@ -92,26 +93,38 @@ namespace Blog.Services.AuthService
 
         }
 
-        public async Task<Result<string>> Register(UserRegisterDto user)
+        public async Task<Result<ApplicationUser>> Register(UserRegisterDto user)
         {
 
             if (userRepository.EmailIfExistsAsync(user.Email).Result == true)
             {
-                return Result<string>.Failure("Email Already Exists.");
+                return Result<ApplicationUser>.Failure("Email Already Exists.");
             }
             else if (userRepository.MobileNumerIfExists(user.Mobile).Result == true)
             {
-                return Result<string>.Failure("Mobile Number already Exists.");
+                return Result<ApplicationUser>.Failure("Mobile Number already Exists.");
             }
             else if (userRepository.EmailIfExistsAsync(user.Email).Result == true && userRepository.MobileNumerIfExists(user.Mobile).Result == true)
             {
-                return Result<string>.Failure("Email already Exists.");
+                return Result<ApplicationUser>.Failure("Email already Exists.");
 
             }
 
+            var applicationUser = mapper.Map<ApplicationUser>(user);
+            applicationUser.Id = Guid.NewGuid();
+            applicationUser.UserName = user.Email;
+            var result = await _userManager.CreateAsync(applicationUser, user.Password);
 
-           await userRepository.CreateUserAsync(user);
-            return Result<string>.Success("User created successfully");
+            return Result<ApplicationUser>.Success(applicationUser);
+        }
+
+        public async Task<string> GenerateEmailConfirmationTokenAsync(ApplicationUser applicationUser)
+        {
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(applicationUser);
+            var encodedToken = Uri.EscapeDataString(token);
+            var frontendUrl = $"http://localhost:4200/email-confirmation?token={encodedToken}&email={applicationUser.Email}";
+
+            return frontendUrl;
         }
         private async Task<LoginResponse> GenerateJwtToken(ApplicationUser user, List<string> roles, List<string> permissions)
         {
@@ -165,7 +178,6 @@ namespace Blog.Services.AuthService
             return Result<UserDto>.Failure("Failed");
         }
 
-
         public async Task<Result<string>> GeneratePasswordToken(string email)
         {
             try
@@ -203,6 +215,20 @@ namespace Blog.Services.AuthService
             }
             return false;
 
+        }
+
+        public async Task<Result<string>> ConfirmEmailAsync(ConfirmEmail confirmEmail)
+        {
+            var user = await _userManager.FindByEmailAsync(confirmEmail.Email);
+            if (user == null)
+                return Result<string>.Failure("User not found");
+            var decodedToken = Uri.UnescapeDataString(confirmEmail.Token);
+            var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+            if (!result.Succeeded)
+            {
+                return Result<string>.Failure("Invalid Token");
+            }
+            return Result<string>.Success("Email Confirmed");
         }
 
     }

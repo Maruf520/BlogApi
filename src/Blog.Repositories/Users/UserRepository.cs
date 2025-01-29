@@ -38,8 +38,6 @@ namespace Blog.Repositories.Users
                 user.Id = Guid.NewGuid();
                 user.UserName = user.Email;
               var result =  await _userManager.CreateAsync(user, userDto.Password);
-
-         
         }
         public async Task<ApplicationUser> GetById(Guid id)
         {

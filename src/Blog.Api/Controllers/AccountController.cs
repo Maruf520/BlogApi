@@ -1,10 +1,9 @@
-﻿using Blog.Dtos.Account;
-using Blog.Dtos.Users;
-using Blog.Models;
+﻿using Blog.Api.Content;
+using Blog.Dtos.Account;
+using Blog.Dtos.Email;
 using Blog.Services.AuthService;
+using Blog.Services.EmailService;
 using Blog.Services.UserService;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -17,20 +16,22 @@ namespace Blog.Api.Controllers
     {
         private readonly IUserService _userService;
         private readonly IAuthService _authService;
-        public AccountController(IUserService userService, IAuthService authService)
+        private readonly IEmailService _emailSender;
+        public AccountController(IUserService userService, IAuthService authService, IEmailService emailSender)
         {
             _userService = userService;
             _authService = authService;
+            _emailSender = emailSender;
         }
         [HttpGet]
-        public async Task<IActionResult> GetUser([FromQuery]string email)
+        public async Task<IActionResult> GetUser([FromQuery] string email)
         {
             var user = await _userService.GetUser(email);
             return user.IsSuccess ? Ok(user.Data) : BadRequest(user.Error.Message);
         }
 
         [HttpPost("request-password-reset")]
-        public async Task<IActionResult> RequestPasswordReset([FromBody]PasswordResetRequestDto dto)
+        public async Task<IActionResult> RequestPasswordReset([FromBody] PasswordResetRequestDto dto)
         {
             var user = await _userService.GetUser(dto.Email);
             if (user.Data is null)
@@ -39,17 +40,32 @@ namespace Blog.Api.Controllers
             }
 
             var token = await _authService.GeneratePasswordToken(dto.Email);
-            var tokenDto = new LoginResponse();
-            tokenDto.Token = token.Data;
+            var emailBody = EmailTemplates.GeneratePasswordResetEmail($"{user.Data.FirstName + " " + user.Data.LastName}", token.Data);
+            var emailDto = new EmailDto();
+            emailDto.Body = emailBody;
+            emailDto.To = dto.Email;
+            emailDto.Subject = "Password Reset URL";
+            emailDto.IsHtml = true;
+            await _emailSender.SendEmailAsync(emailDto);
+            return token.IsSuccess ? Ok("Password reset link has been sent to your email.") : BadRequest(token.Error.Message);
+        }
 
-            return token.IsSuccess ? Ok(tokenDto) : BadRequest(token.Error.Message);
+        [HttpPost("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail([FromBody]ConfirmEmail confirmEmail)
+        {
+            if (string.IsNullOrEmpty(confirmEmail.Email) || string.IsNullOrEmpty(confirmEmail.Token))
+                return BadRequest("Invalid email confirmation link");
+
+            var confirmation = await _authService.ConfirmEmailAsync(confirmEmail);
+
+            return confirmation.IsSuccess ? Ok(confirmation.Data) : BadRequest(confirmation.Error.Message);
         }
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] PasswordResetDto resetDto)
         {
             var verify = await _authService.ResetPassword(resetDto.Email, resetDto.Token, resetDto.NewPassword);
-            
-            if(!verify)
+
+            if (!verify)
             {
                 return BadRequest("Invalid Token");
             }

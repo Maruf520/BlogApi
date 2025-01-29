@@ -34,5 +34,16 @@ namespace Blog.Services.UserService
             
             return Result<UserDto>.Success(result);
         }
+
+        public async Task<Result<ApplicationUser>> GetUserByEmailAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if(user == null)
+            {
+                return Result<ApplicationUser>.Failure("User Not Found");
+            }
+
+            return Result<ApplicationUser>.Success(user);
+        }
     }
 }

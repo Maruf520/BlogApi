@@ -1,6 +1,9 @@
-﻿using Blog.Dtos.Users;
+﻿using Blog.Api.Content;
+using Blog.Dtos.Email;
+using Blog.Dtos.Users;
 using Blog.Services.AuthorizationService;
 using Blog.Services.AuthService;
+using Blog.Services.EmailService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -15,22 +18,37 @@ namespace Blog.Api.Controllers
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IAuthService authService;
         private readonly IAuthorizationService _authorizationService;
-        public AuthController(IAuthService authService, IHttpContextAccessor httpContextAccessor, IAuthorizationService authorizationService)
+        private readonly IEmailService _emailService;
+        public AuthController(IAuthService authService, IHttpContextAccessor httpContextAccessor, IAuthorizationService authorizationService, IEmailService emailService)
         {
             this.authService = authService;
             _httpContextAccessor = httpContextAccessor;
             _authorizationService = authorizationService;
+            _emailService = emailService;
         }
 
 
         [HttpPost("Register")]
         public async Task<IActionResult> Register(UserRegisterDto userRegisterDto)
          {
-            var response = await authService.Register(userRegisterDto);
+            var user = await authService.Register(userRegisterDto);
+            if(user.Data == null)
+            {
+                return user.IsSuccess ? Ok("Verification Email has been sent to your email.") : BadRequest(user.Error.Message);
+            }
+            var emailConfirmationToken = await authService.GenerateEmailConfirmationTokenAsync(user.Data);
 
-            return response.IsSuccess ? Ok(response) : BadRequest(response);
+            var emailBody = EmailTemplates.GenerateVerificationEmail($"{user.Data.FirstName + " " + user.Data.LastName}", emailConfirmationToken, 24);
+            var emailDto = new EmailDto();
+            emailDto.Subject = "Verify Email";
+            emailDto.Body = emailBody;
+            emailDto.To = user.Data.Email;
+            emailDto.IsHtml = true;
+            await _emailService.SendEmailAsync(emailDto);
 
+            return Ok("Verification Email Sent to you email.");
         }
+
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetUser(string userId)
         {
