@@ -1,10 +1,11 @@
 ﻿using Blog.Dtos.Email;
+using Blog.Models;
 using System.Threading.Tasks;
 
 namespace Blog.Services.EmailService
 {
     public interface IEmailService
     {
-        Task<bool> SendEmailAsync(EmailDto emailDto);
+        Task<Result<string>> SendEmailAsync(EmailDto emailDto);
     }
 }

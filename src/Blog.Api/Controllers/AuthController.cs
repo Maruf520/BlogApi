@@ -7,6 +7,8 @@ using Blog.Services.EmailService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Net.Http;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Blog.Api.Controllers
@@ -44,9 +46,9 @@ namespace Blog.Api.Controllers
             emailDto.Body = emailBody;
             emailDto.To = user.Data.Email;
             emailDto.IsHtml = true;
-            await _emailService.SendEmailAsync(emailDto);
+           var result =  await _emailService.SendEmailAsync(emailDto);
 
-            return Ok("Verification Email Sent to you email.");
+            return result.IsSuccess ? Ok(result) : BadRequest(result.Error.Message);
         }
 
         [HttpGet("{userId}")]
@@ -57,6 +59,27 @@ namespace Blog.Api.Controllers
             return response.IsSuccess ? Ok(response) : BadRequest(response);
 
         }
+        [Microsoft.AspNetCore.Authorization.Authorize(AuthenticationSchemes = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet("get-user")]
+        public async Task<IActionResult> GetLoggedInUser()
+        {
+            var userId = _httpContextAccessor.HttpContext.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            var response = await authService.GetUser(userId);
+
+            return response.IsSuccess ? Ok(response) : BadRequest(response);
+
+        }
+
+        [Microsoft.AspNetCore.Authorization.Authorize(AuthenticationSchemes = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPut("update-profile")]
+        public async Task<IActionResult> UpdateUser([FromBody] UserUpdateDto dto)
+        {
+            var user = await authService.UpdateUser(dto);
+
+            return user.IsSuccess ? Ok(user) : BadRequest(user.Error.Message);
+        }
+
+
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(UserLoginDto userLoginDto)

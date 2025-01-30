@@ -20,7 +20,7 @@ namespace Blog.Services.EmailService
             _logger = logger;
         }
 
-        public async Task<bool> SendEmailAsync(EmailDto emailDto)
+        public async Task<Result<string>> SendEmailAsync(EmailDto emailDto)
         {
             try
             {
@@ -42,12 +42,12 @@ namespace Blog.Services.EmailService
 
                 await smtpClient.SendMailAsync(message);
                 _logger.LogInformation($"Email sent successfully to {emailDto.To}");
-                return true;
+                return Result<string>.Success("Verification Email has been sent");
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Failed to send email: {ex.Message}");
-                return false;
+                return Result<string>.Success("Failed Verification Email");
             }
         }
     }

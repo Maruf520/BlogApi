@@ -53,6 +53,10 @@ namespace Blog.Services.AuthService
                 {
                     return Result<LoginResponse>.Failure("Invalid login attempt. User not found.");
                 }
+                if(user.EmailConfirmed == false)
+                {
+                    return Result<LoginResponse>.Failure("To Login, verify your email first!!");
+                }
                 var result = await _userManager.CheckPasswordAsync(user, userDto.Password);
                 if (result != false)
                 {
@@ -229,6 +233,42 @@ namespace Blog.Services.AuthService
                 return Result<string>.Failure("Invalid Token");
             }
             return Result<string>.Success("Email Confirmed");
+        }
+
+        public async Task<Result<UserUpdateDto>> UpdateUser(UserUpdateDto dto)
+        {
+            try
+            {
+                var userId = _contextAccessor.HttpContext.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Result<UserUpdateDto>.Failure("User not authenticated");
+                }
+
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return Result<UserUpdateDto>.Failure("User not found");
+                }
+
+                user.FirstName = dto.FirstName;
+                user.LastName = dto.LastName;
+                user.Email = dto.Email;
+                user.Address = dto.Address;
+                user.PhoneNumber = dto.Mobile;
+
+                var result = await _userManager.UpdateAsync(user);
+                if (!result.Succeeded)
+                {
+                    return Result<UserUpdateDto>.Failure(result.Errors.FirstOrDefault()?.Description ?? "Failed to update user");
+                }
+
+                return Result<UserUpdateDto>.Success(dto);
+            }
+            catch (Exception ex)
+            {
+                return Result<UserUpdateDto>.Failure($"An error occurred: {ex.Message}");
+            }
         }
 
     }

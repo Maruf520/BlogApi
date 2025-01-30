@@ -1,6 +1,7 @@
 ﻿using Blog.Api.Content;
 using Blog.Dtos.Account;
 using Blog.Dtos.Email;
+using Blog.Models;
 using Blog.Services.AuthService;
 using Blog.Services.EmailService;
 using Blog.Services.UserService;
@@ -34,20 +35,24 @@ namespace Blog.Api.Controllers
         public async Task<IActionResult> RequestPasswordReset([FromBody] PasswordResetRequestDto dto)
         {
             var user = await _userService.GetUser(dto.Email);
-            if (user.Data is null)
+            if (user.IsFailure == true)
             {
                 return BadRequest("User Not Found. Please contact with admin.");
             }
 
             var token = await _authService.GeneratePasswordToken(dto.Email);
-            var emailBody = EmailTemplates.GeneratePasswordResetEmail($"{user.Data.FirstName + " " + user.Data.LastName}", token.Data);
-            var emailDto = new EmailDto();
-            emailDto.Body = emailBody;
-            emailDto.To = dto.Email;
-            emailDto.Subject = "Password Reset URL";
-            emailDto.IsHtml = true;
-            await _emailSender.SendEmailAsync(emailDto);
-            return token.IsSuccess ? Ok("Password reset link has been sent to your email.") : BadRequest(token.Error.Message);
+            if(token.Data != null)
+            {
+                var emailBody = EmailTemplates.GeneratePasswordResetEmail($"{user.Data.FirstName + " " + user.Data.LastName}", token.Data);
+                var emailDto = new EmailDto();
+                emailDto.Body = emailBody;
+                emailDto.To = dto.Email;
+                emailDto.Subject = "Password Reset URL";
+                emailDto.IsHtml = true;
+                var result = await _emailSender.SendEmailAsync(emailDto);
+                return result.IsSuccess ? Ok(result) : BadRequest(result.Error.Message);
+            }
+            return token.IsSuccess ? Ok(token) : BadRequest(token.Error.Message);
         }
 
         [HttpPost("confirm-email")]

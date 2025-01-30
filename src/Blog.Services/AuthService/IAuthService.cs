@@ -15,5 +15,6 @@ namespace Blog.Services.AuthService
         Task<bool> ResetPassword(string email, string token, string newPassword);
         Task<string> GenerateEmailConfirmationTokenAsync(ApplicationUser applicationUser);
         Task<Result<string>> ConfirmEmailAsync(ConfirmEmail confirmEmail);
+        Task<Result<UserUpdateDto>> UpdateUser(UserUpdateDto dto);
     }
 }
